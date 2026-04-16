@@ -159,7 +159,7 @@ const LANGS: Array<{ id: LanguageCode; label: string; locale: string }> = [
 
 const COPY: Record<LanguageCode, Copy> = {
   ko: {
-    appName: "말씀동행 AI",
+    appName: "나만의 기도일기",
     home: "홈",
     bible: "번역",
     journal: "동행일기",
@@ -521,7 +521,7 @@ const App = () => {
   const [entries, setEntries] = useState<PrayerEntry[]>(() => readJson<PrayerEntry[]>(STORAGE_ENTRIES, []));
   const [sessionUser, setSessionUser] = useState<string>(() => localStorage.getItem(STORAGE_SESSION) || "");
   const [bankInfo, setBankInfo] = useState<BankInfo>(() =>
-    readJson<BankInfo>(STORAGE_BANK, { bank: "국민은행", account: "000-000-00-000000", holder: "말씀동행", contact: "contact@example.com" }),
+    readJson<BankInfo>(STORAGE_BANK, { bank: "국민은행", account: "000-000-00-000000", holder: "나만의 기도일기", contact: "contact@example.com" }),
   );
 
   const [prayer, setPrayer] = useState("");
