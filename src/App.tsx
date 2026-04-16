@@ -161,7 +161,7 @@ const COPY: Record<LanguageCode, Copy> = {
   ko: {
     appName: "나만의 기도일기",
     home: "홈",
-    bible: "번역",
+    bible: "성경",
     journal: "동행일기",
     hymn: "찬송",
     support: "후원",
