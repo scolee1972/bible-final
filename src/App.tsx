@@ -129,7 +129,17 @@ interface BibleVersion {
   label: string;
   language: LanguageCode;
 }
-
+  const [bibleTestament, setBibleTestament] = useState<"old"|"new">("old");
+  const [bibleBook, setBibleBook] = useState("");
+  const [bibleChapter, setBibleChapter] = useState(0);
+  const [bibleText, setBibleText] = useState("");
+  const [bibleLoading, setBibleLoading] = useState(false);
+  const OT_BOOKS = ["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi"];
+  const NT_BOOKS = ["Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
+  const OT_KO = ["창세기","출애굽기","레위기","민수기","신명기","여호수아","사사기","룻기","사무엘상","사무엘하","열왕기상","열왕기하","역대상","역대하","에스라","느헤미야","에스더","욥기","시편","잠언","전도서","아가","이사야","예레미야","예레미야애가","에스겔","다니엘","호세아","요엘","아모스","오바댜","요나","미가","나훔","하박국","스바냐","학개","스가랴","말라기"];
+  const NT_KO = ["마태복음","마가복음","누가복음","요한복음","사도행전","로마서","고린도전서","고린도후서","갈라디아서","에베소서","빌립보서","골로새서","데살로니가전서","데살로니가후서","디모데전서","디모데후서","디도서","빌레몬서","히브리서","야고보서","베드로전서","베드로후서","요한일서","요한이서","요한삼서","유다서","요한계시록"];
+  const BOOK_CHAPTERS: Record<string,number> = {Genesis:50,Exodus:40,Leviticus:27,Numbers:36,Deuteronomy:34,Joshua:24,Judges:21,Ruth:4,"1 Samuel":31,"2 Samuel":24,"1 Kings":22,"2 Kings":25,"1 Chronicles":29,"2 Chronicles":36,Ezra:10,Nehemiah:13,Esther:10,Job:42,Psalms:150,Proverbs:31,Ecclesiastes:12,"Song of Solomon":8,Isaiah:66,Jeremiah:52,Lamentations:5,Ezekiel:48,Daniel:12,Hosea:14,Joel:3,Amos:9,Obadiah:1,Jonah:4,Micah:7,Nahum:3,Habakkuk:3,Zephaniah:3,Haggai:2,Zechariah:14,Malachi:4,Matthew:28,Mark:16,Luke:24,John:21,Acts:28,Romans:16,"1 Corinthians":16,"2 Corinthians":13,Galatians:6,Ephesians:6,Philippians:4,Colossians:4,"1 Thessalonians":5,"2 Thessalonians":3,"1 Timothy":6,"2 Timothy":4,Titus:3,Philemon:1,Hebrews:13,James:5,"1 Peter":5,"2 Peter":3,"1 John":5,"2 John":1,"3 John":1,Jude:1,Revelation:22};
+  const fetchBible = async (book: string, ch: number) => { setBibleLoading(true); setBibleText(""); try { const r = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${ch}`); const d = await r.json(); setBibleText(d.text || "내용을 불러올 수 없습니다."); } catch { setBibleText("성경 내용을 불러오는데 실패했습니다."); } finally { setBibleLoading(false); } };
 interface Verse {
   id: string;
   topic: Theme;
@@ -2263,29 +2273,7 @@ export default function App() {
               ) : null}
             </motion.section>
           ) : null}
-
-          {tab === "bible" ? (
-            <motion.section key="bible" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3 rounded-xl bg-white p-3 shadow-sm">
-              <h2 className="text-sm font-bold text-blue-700">{t.versionSelect}</h2>
-              <p className="text-sm text-slate-600">{t.maxVersion}</p>
-              {LANGUAGES.map((group) => {
-                const list = BIBLE_VERSIONS.filter((item) => item.language === group.id);
-                if (!list.length) return null;
-                return (
-                  <div key={group.id} className="space-y-2 border-t border-slate-100 pt-2 first:border-t-0 first:pt-0">
-                    <p className="text-xs font-semibold text-blue-600">{group.label}</p>
-                    {list.map((version) => (
-                      <label key={version.id} className="flex items-center justify-between rounded-md border border-slate-200 p-2 text-sm">
-                        {version.label}
-                        <input type="checkbox" checked={selectedVersions.includes(version.id)} onChange={() => toggleVersion(version.id)} />
-                      </label>
-                    ))}
-                  </div>
-                );
-              })}
-            </motion.section>
-          ) : null}
-
+      {tab === "bible" && (<div className="p-4 space-y-4"><div className="flex gap-2"><button onClick={() => { setBibleTestament("old"); setBibleBook(""); setBibleChapter(0); setBibleText(""); }} className={`flex-1 py-2 rounded-lg font-bold ${bibleTestament === "old" ? "bg-blue-600 text-white" : "bg-gray-200"}`}>구약</button><button onClick={() => { setBibleTestament("new"); setBibleBook(""); setBibleChapter(0); setBibleText(""); }} className={`flex-1 py-2 rounded-lg font-bold ${bibleTestament === "new" ? "bg-blue-600 text-white" : "bg-gray-200"}`}>신약</button></div>{!bibleBook && (<div className="grid grid-cols-3 gap-2">{(bibleTestament === "old" ? OT_BOOKS : NT_BOOKS).map((b, i) => (<button key={b} onClick={() => setBibleBook(b)} className="py-2 px-1 border rounded-lg text-sm hover:bg-blue-50">{(bibleTestament === "old" ? OT_KO : NT_KO)[i]}</button>))}</div>)}{bibleBook && !bibleChapter && (<div><button onClick={() => setBibleBook("")} className="mb-3 text-blue-600">← 목록으로</button><h3 className="font-bold mb-2">{(bibleTestament === "old" ? OT_KO : NT_KO)[(bibleTestament === "old" ? OT_BOOKS : NT_BOOKS).indexOf(bibleBook)]} - 장 선택</h3><div className="grid grid-cols-5 gap-2">{Array.from({ length: BOOK_CHAPTERS[bibleBook] || 1 }, (_, i) => (<button key={i+1} onClick={() => { setBibleChapter(i+1); fetchBible(bibleBook, i+1); }} className="py-2 border rounded-lg hover:bg-blue-50">{i+1}</button>))}</div></div>)}{bibleBook && bibleChapter > 0 && (<div><button onClick={() => { setBibleChapter(0); setBibleText(""); }} className="mb-3 text-blue-600">← 장 목록으로</button><h3 className="font-bold mb-2">{(bibleTestament === "old" ? OT_KO : NT_KO)[(bibleTestament === "old" ? OT_BOOKS : NT_BOOKS).indexOf(bibleBook)]} {bibleChapter}장</h3>{bibleLoading ? <p className="text-center py-8">📖 불러오는 중...</p> : <div className="bg-white rounded-xl p-4 shadow leading-relaxed whitespace-pre-wrap">{bibleText}</div>}</div>)}</div>)}
           {tab === "calendar" ? (
             <motion.section key="calendar" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
               <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2 shadow-sm">
